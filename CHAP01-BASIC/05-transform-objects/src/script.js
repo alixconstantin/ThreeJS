@@ -25,7 +25,7 @@ const scene = new THREE.Scene();
  *      - the x axis is going to the right.
  */
 const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const material = new THREE.MeshBasicMaterial({ color: 'blue' });
 const mesh = new THREE.Mesh(geometry, material);
 
 mesh.position.x = 0.7;
@@ -33,7 +33,8 @@ mesh.position.y = - 0.6;
 mesh.position.z = 1;
 scene.add(mesh); 
 // Can update all 3 at once by using mesh.position.set(0.7, -0.6, 1);
-
+// You can normalize its values (meaning that you will reduce the length of the vector to 1 unit but preserve its direction):
+//console.log(mesh.position.normalize())
 
 /**
  * Scale
@@ -74,6 +75,47 @@ mesh.rotation.z = Math.PI * 0.25;
 
 
 /**
+ * Scene graph
+ * 
+ * At some point, you might want to group things. Let's say you are building a house with walls, doors, windows, a roof, bushes, etc.
+ * When you think you're done, you become aware that the house is too small, and you have to re-scale each object and update their positions.
+ * A good alternative would be to group all those objects into a container and scale that container.
+ * You can do that with the Group class.
+ * Instantiate a Group and add it to the scene. Now, when you want to create a new object, you can add it to the Group you just created using the add(...)
+ * method rather than adding it directly to the scene.
+ * Because the Group class inherits from the Object3D class, it has access to the previously-mentioned properties and methods like
+ * position, scale, rotation, quaternion, and lookAt.
+ */
+
+const group = new THREE.Group()
+group.scale.y = 2
+group.rotation.y = 0.2
+scene.add(group)
+
+const cube1 = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+)
+cube1.position.x = - 1.5
+group.add(cube1)
+
+const cube2 = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+)
+cube2.position.x = 0
+group.add(cube2)
+
+const cube3 = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+)
+cube3.position.x = 1.5
+group.add(cube3)
+
+
+
+/**
  * Axes Helper
  * 
  * The AxesHelper will display 3 lines corresponding to the x, y and z axes,
@@ -104,6 +146,9 @@ const sizes = {
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 camera.position.z=5;
 scene.add(camera);
+//You can get the distance from another Vector3 (make sure to use this code after creating the camera):
+//console.log(mesh.position.distanceTo(camera.position))
+
 
 /**
  * lookAt(...) 
@@ -112,7 +157,9 @@ scene.add(camera);
  * Can use it to rotate the camera toward an object, orientate a cannon to face an enemy, or move the character's eyes to an object.
  * The parameter is the target and must be a Vector3.
  */
-camera.lookAt(new THREE.Vector3(0, - 1, 0))
+camera.lookAt(new THREE.Vector3(0, - 1, 0));
+// camera.lookAt(mesh.position) will look at the center of the mesh
+
 
 /**
  * Renderer

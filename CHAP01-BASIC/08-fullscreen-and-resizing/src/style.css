@@ -1,0 +1,12 @@
+/* classical remove of white line around page */
+* {
+margin:0;
+padding: 0;
+}
+
+/* Remove scroll bar and potential blue line on some internet browser  */
+html,
+body
+{
+    overflow: hidden;
+}

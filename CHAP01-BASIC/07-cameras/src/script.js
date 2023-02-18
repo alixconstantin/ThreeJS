@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-console.log(OrbitControls);
 
 /**
  * The ArrayCamera is used to render your scene multiple times by using multiple cameras.

@@ -29,54 +29,43 @@ const sizes = {
 };
 // For make the resize responsive, need to use resize event
 window.addEventListener("resize", () => {
+  // Update sizes
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
 
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
+  // Secondly, we must update the camera aspect ratio by changing its aspect property
+  // And when you change camera properties like aspect you also need to update the projection matrix using camera.updateProjectionMatrix()
+  // Update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
 
-    // Secondly, we must update the camera aspect ratio by changing its aspect property
-    // And when you change camera properties like aspect you also need to update the projection matrix using camera.updateProjectionMatrix()
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
-
-    // Updating the renderer will automatically update the canvas width and height, and if not the renderer will stretch with resizing
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    //Handle pixel ratio
-    // Will help to remove the blurry appearance
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
+  // Updating the renderer will automatically update the canvas width and height, and if not the renderer will stretch with resizing
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height);
+  //Handle pixel ratio
+  // Will help to remove the blurry appearance
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
 // Double Clic Event for fullScreen and leave FullScreen with double clic
-window.addEventListener('dblclick', () =>
-{
-    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+window.addEventListener("dblclick", () => {
+  const fullscreenElement =
+    document.fullscreenElement || document.webkitFullscreenElement;
 
-    if(!fullscreenElement)
-    {
-        if(canvas.requestFullscreen)
-        {
-            canvas.requestFullscreen()
-        }
-        else if(canvas.webkitRequestFullscreen)
-        {
-            canvas.webkitRequestFullscreen()
-        }
+  if (!fullscreenElement) {
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen();
+    } else if (canvas.webkitRequestFullscreen) {
+      canvas.webkitRequestFullscreen();
     }
-    else
-    {
-        if(document.exitFullscreen)
-        {
-            document.exitFullscreen()
-        }
-        else if(document.webkitExitFullscreen)
-        {
-            document.webkitExitFullscreen()
-        }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
     }
-})
+  }
+});
 
 /**
  * Camera

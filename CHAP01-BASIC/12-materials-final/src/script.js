@@ -55,6 +55,7 @@ scene.add(light);
  * Objects
  */
 
+
 // const material = new THREE.MeshBasicMaterial()
 // material.map = doorColorTexture
 // material.color = new THREE.Color('#ff0000')

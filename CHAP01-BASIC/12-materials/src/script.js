@@ -188,17 +188,38 @@ scene.add(light);
 // material.roughness = 1
 // gui.add(material, 'metalness').min(0).max(1).step(0.0001)
 // gui.add(material, 'roughness').min(0).max(1).step(0.0001)
+
+// * The map property allows you to apply a simple texture.The map property allows you to apply a simple texture.
 // material.map = doorColorTexture
+
+// * The aoMap property (literally "ambient occlusion map") will add shadows where the texture is dark.
+// * For it to work, you must add what we call a second set of UV (the coordinates that help position the textures on the geometries).
+// * We can simply add new attributes like we did on the Geometries
+// * and use the default uv attribute. In more simple terms, we duplicated the uv attribute.
+// * Call this new attribute uv2
+// * exemple : sphere.geometry.setAttribute('uv2', new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2))
 // material.aoMap = doorAmbientOcclusionTexture
 // material.aoMapIntensity = 1
+
+// * The displacementMap property will move the vertices to create true relief
 // material.displacementMap = doorHeightTexture
+// * if it look terrible, is due to the lack of vertices on the geometries (we need more subdivisions) and the displacement being way too strong
 // material.displacementScale = 0.05
+
+// * Instead of specifying uniform metalness and roughness for the whole geometry, we can use metalnessMap and roughnessMap:
 // material.metalnessMap = doorMetalnessTexture
 // material.roughnessMap = doorRoughnessTexture
+
+// * The normalMap will fake the normal orientation and add details on the surface regardless of the subdivision:
 // material.normalMap = doorNormalTexture
+
+// * You can change the normal intensity with the normalScale property. Be careful, it's a Vector2:
 // material.normalScale.set(0.5, 0.5)
+
+// * you can control the alpha too using the alphaMap property. Don't forget to set the transparent property to true:
 // material.transparent = true
 // material.alphaMap = doorAlphaTexture
+
 
 // const material = new THREE.MeshPhysicalMaterial()
 // material.metalness = 0

@@ -51,7 +51,7 @@ const scene = new THREE.Scene();
 
 /**
  * Lights
- */
+
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
@@ -60,10 +60,12 @@ light.position.x = 2;
 light.position.y = 3;
 light.position.z = 4;
 scene.add(light);
-
+ */
 /**
  * Objects
  */
+
+
 
 // * MESH BASIC MATERIAL 
 // const material = new THREE.MeshBasicMaterial()
@@ -145,14 +147,13 @@ scene.add(light);
 
 // * MESH PHONG MATERIAL
 
-// * The MeshPhongMaterial is very similar to the MeshLambertMaterial, but the strange patterns are less visible
-// * and you can also see the light reflection on the surface of the geometry:
+// * The MeshPhongMaterial is very similar to the MeshLambertMaterial, but the strange patterns are less visible ( so PHONG > LAMBER)
 // const material = new THREE.MeshPhongMaterial()
-// * MeshPhongMaterial is less performant than MeshLambertMaterial.
+// * But MeshPhongMaterial is less performant than MeshLambertMaterial.
 
 // * You can control the light reflection with the shininess property. The higher the value, the shinier the surface.
-// * You can also change the color of the reflection by using the specular property:
 // material.shininess = 100
+// * You can also change the color of the reflection by using the specular property:
 // material.specular = new THREE.Color(0x1188ff)
 
 
@@ -173,6 +174,15 @@ scene.add(light);
 // * you can use the gradientMap property and use the gradientTexture we loaded at the start :
 // material.gradientMap = gradientTexture
 
+
+
+// * MESH STANDARD MATERIAL ( the best one :p )
+
+// * The MeshStandardMaterial uses physically based rendering principles.
+// *  Like the MeshLambertMaterial and the MeshPhongMaterial, it supports lights but with a more realistic algorithm and better parameters
+// * like roughness and metalness.
+// * It's called "standard" because the PBR is becoming a standard in many software, engines, and libraries.
+// * The idea is to have a realistic result with realistic parameters, and you should have a very similar result regardless of the technology
 // const material = new THREE.MeshStandardMaterial()
 // material.metalness = 0
 // material.roughness = 1

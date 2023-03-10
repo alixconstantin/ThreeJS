@@ -179,7 +179,7 @@ scene.add(light);
 // * MESH STANDARD MATERIAL ( the best one :p )
 
 // * The MeshStandardMaterial uses physically based rendering principles.
-// *  Like the MeshLambertMaterial and the MeshPhongMaterial, it supports lights but with a more realistic algorithm and better parameters
+// * Like the MeshLambertMaterial and the MeshPhongMaterial, it supports lights but with a more realistic algorithm and better parameters
 // * like roughness and metalness.
 // * It's called "standard" because the PBR is becoming a standard in many software, engines, and libraries.
 // * The idea is to have a realistic result with realistic parameters, and you should have a very similar result regardless of the technology
@@ -221,30 +221,37 @@ scene.add(light);
 // material.alphaMap = doorAlphaTexture
 
 
+// * MESH PHYSICAL MATERIAL
+// * The MeshPhysicalMaterial is the same as the MeshStandardMaterial but with support of a clear coat effect.
+// * You can control that clear coat's properties and even use a texture as in this Three.js
 // const material = new THREE.MeshPhysicalMaterial()
 // material.metalness = 0
 // material.roughness = 1
-// gui.add(material, 'metalness').min(0).max(1).step(0.0001)
-// gui.add(material, 'roughness').min(0).max(1).step(0.0001)
-// material.map = doorColorTexture
-// material.aoMap = doorAmbientOcclusionTexture
-// material.aoMapIntensity = 1
-// material.displacementMap = doorHeightTexture
-// material.displacementScale = 0.05
-// material.metalnessMap = doorMetalnessTexture
-// material.roughnessMap = doorRoughnessTexture
-// material.normalMap = doorNormalTexture
-// material.normalScale.set(0.5, 0.5)
-// material.transparent = true
-// material.alphaMap = doorAlphaTexture
-// material.clearcoat = 1
-// material.clearcoatRoughness = 0
+
+
+// * POINTS MATERIAL 
+// * You can use PointsMaterial with particles.
+
+
+// * SHADER MATERIAL and RAW SHADER MATERIAL
+// * ShaderMaterial and RawShaderMaterial can both be used to create your own materials
+
+
+// * ENVIRONNEMENT MAP
+
+// * The environment map is like an image of what's surrounding the scene.
+// * You can use it to add reflection or refraction to your objects. It can also be used as lighting information.
+// * Environnement Map are supported by multiple material
+// * ThreeJS only support cube environnement maps
+// * To load a cube texture we must use the CubeTextureLoader instead of the TextureLoader.
+// * Instantiate the CubeTextureLoader before instantiating the material and call its load(...) method but use an array of paths instead of one path ( at the top of code here )
 
 const material = new THREE.MeshStandardMaterial();
 material.metalness = 0.7;
 material.roughness = 0.2;
 gui.add(material, "metalness").min(0).max(1).step(0.0001);
 gui.add(material, "roughness").min(0).max(1).step(0.0001);
+// * You can now use the environmentMapTexture in the envMap property of your material:
 material.envMap = environmentMapTexture;
 
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), material);

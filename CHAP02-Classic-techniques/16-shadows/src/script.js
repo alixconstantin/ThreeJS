@@ -50,12 +50,58 @@ scene.add(directionalLight)
  * Finally, activate the shadows on the light with the castShadow property.
  * 
  * Only the following types of lights support shadows : PointLight, DirectionalLight, SpotLight
+ * 
+ * Shadow map optimisations
+ * 
+ * By default, the shadow map size is only 512x512 for performance reasons.
+ * We can improve it but keep in mind that you need a power of 2 value for the mipmapping
  */
+directionalLight.shadow.mapSize.width = 1024
+directionalLight.shadow.mapSize.height = 1024
+
+
+// * we must define a near and a far.
+// * It won't really improve the shadow's quality, but it might fix bugs where you can't see the shadow or where the shadow appears suddenly cropped.
+directionalLight.shadow.camera.near = 1
+directionalLight.shadow.camera.far = 6
 
 
 
+// * To help us debug the camera and preview the near and far, we can use a CameraHelper with the camera used for the shadow map
+const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+scene.add(directionalLightCameraHelper)
+
+// * Amplitude
+
+// * With the camera helper we just added, we can see that the camera's amplitude is too large.
+// * Because we are using a DirectionalLight, Three.js is using an OrthographicCamera.
+// * The smaller the values, the more precise the shadow will be. But if it's too small, the shadows will just be cropped.
+directionalLight.shadow.camera.top = 2
+directionalLight.shadow.camera.right = 2
+directionalLight.shadow.camera.bottom = - 2
+directionalLight.shadow.camera.left = - 2
+
+directionalLightCameraHelper.visible = false
+
+// * Blur
+
+// * You can control the shadow blur with the radius property:
+// * This technique doesn't use the proximity of the camera with the object. It's just a general and cheap blur.
+directionalLight.shadow.radius = 5
 
 
+
+// * Shadow map algorithm
+
+// * Different types of algorithms can be applied to shadow maps:
+// * THREE.BasicShadowMap: Very performant but lousy quality
+// * THREE.PCFShadowMap: Less performant but smoother edges
+// * THREE.PCFSoftShadowMap: Less performant but even softer edges
+// * THREE.VSMShadowMap: Less performant, more constraints, can have unexpected results
+// * To change it, update the renderer.shadowMap.type property. 
+// * The default is THREE.PCFShadowMap but you can use THREE.PCFSoftShadowMap for better quality.
+// * -> renderer.shadowMap.type = THREE.PCFSoftShadowMap
+// * Be aware that the radius property doesn't work with THREE.PCFSoftShadowMap. You'll have to choose.
 
 /**
  * Materials
@@ -132,7 +178,12 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 
+
 renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+
+
 
 /**
  * Animate

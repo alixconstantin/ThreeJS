@@ -103,6 +103,14 @@ directionalLight.shadow.radius = 5
 // * -> renderer.shadowMap.type = THREE.PCFSoftShadowMap
 // * Be aware that the radius property doesn't work with THREE.PCFSoftShadowMap. You'll have to choose.
 
+// * SpotLight
+
+// * 
+
+
+
+
+
 /**
  * Materials
  */

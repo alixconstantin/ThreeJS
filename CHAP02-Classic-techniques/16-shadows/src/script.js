@@ -18,6 +18,13 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader()
+// const bakedShadow = textureLoader.load('/textures/bakedShadow.jpg')
+
+
+/**
  * Lights
  */
 // Ambient light
@@ -103,9 +110,102 @@ directionalLight.shadow.radius = 5
 // * -> renderer.shadowMap.type = THREE.PCFSoftShadowMap
 // * Be aware that the radius property doesn't work with THREE.PCFSoftShadowMap. You'll have to choose.
 
-// * SpotLight
+// * SpotLight ( shadows )
+const spotLight = new THREE.SpotLight(0xffffff, 0.4, 10, Math.PI * 0.3)
 
-// * 
+spotLight.castShadow = true
+
+spotLight.position.set(0, 2, 2)
+scene.add(spotLight)
+scene.add(spotLight.target)
+
+const spotLightCameraHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+scene.add(spotLightCameraHelper)
+// * As you can see, shadows don't merge nicely. They are handled independently, and, unfortunately, there is not much to do about it.
+// * But we can improve the shadow quality using the same techniques that we used for the directional light. ( mapSize)
+spotLight.shadow.mapSize.width = 1024
+spotLight.shadow.mapSize.height = 1024
+// * Because we are now using a SpotLight, internally, Three.js is using a PerspectiveCamera.
+// * That means that instead of the top, right, bottom, and left properties, we must change the fov property.
+// * Try to find an angle as small as possible without having the shadows cropped:
+spotLight.shadow.camera.fov = 30
+
+spotLight.shadow.camera.near = 1
+spotLight.shadow.camera.far = 6
+
+gui.add(spotLight.shadow.camera, 'near', 0, 10);
+gui.add(spotLight.shadow.camera, 'far', 0, 10);
+spotLightCameraHelper.visible = false
+
+
+// * PointLight
+
+// Point light
+const pointLight = new THREE.PointLight(0xffffff, 0.3)
+
+pointLight.castShadow = true
+
+pointLight.position.set(- 1, 1, 0)
+scene.add(pointLight)
+
+const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera)
+scene.add(pointLightCameraHelper)
+
+// * As you can see, the camera helper is a PerspectiveCamera (like for the SpotLight) but facing downward.
+// * That is due to how Three.js handles shadow maps for the PointLight.
+// * Because the point light illuminates in every direction, Three.js will have to render each of the 6 directions to create a cube shadow map.
+// * The camera helper you see is the camera's position in the last of those 6 renders (which is downward).
+// * * Doing all those renders can generate performance issues. Try to avoid having too much PointLight with shadows enabled.
+// * The only properties you can tweak here are the mapSize, near and far
+pointLight.shadow.mapSize.width = 1024
+pointLight.shadow.mapSize.height = 1024
+
+pointLight.shadow.camera.near = 0.1
+pointLight.shadow.camera.far = 5
+pointLightCameraHelper.visible = false
+
+// * Baking shadows
+
+// * Three.js shadows can be very useful if the scene is simple, but it might otherwise become messy.
+// * A good alternative is baked shadows. We talk about baked lights in the previous lesson and it is exactly the same thing. Shadows are integrated into textures that we apply on materials.
+// * Instead of commenting all the shadows related lines of code, we can simply deactivate them in the renderer and on each light:
+directionalLight.castShadow = false
+// ...
+spotLight.castShadow = false
+// ...
+pointLight.castShadow = false
+// ...
+// renderer.shadowMap.enabled = false
+// * Now we can load a shadow texture located in /static/textures/bakedShadow.jpg using the classic TextureLoader.
+/**
+ * const textureLoader = new THREE.TextureLoader()
+ * const bakedShadow = textureLoader.load('/textures/bakedShadow.jpg')
+ * 
+ * const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(5, 5),
+    new THREE.MeshBasicMaterial({
+        map: bakedShadow
+    })
+)
+ */
+// * You should see a nice blurred, and realistic fake shadow.
+// *  The main problem is that it's not dynamic, and if the sphere or the lights moves, the shadows won't.
+
+
+// * Baking shadows alternative !
+
+// * A less realistic but more dynamic solution would be to use a more simple shadow under the sphere and slightly above the plane.
+// * The texture is a simple halo. The white part will be visible and the black part will be invisible.
+// * Then, we move that shadow with the sphere.
+// * First, let's remove the previous baked shadow by putting back the MeshStandardMaterial on the plane:
+/**
+ * const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(5, 5),
+    material
+)
+ */
+// * Then, we can load a basic shadow texture located in /static/textures/simpleShadow.jpg.
+const simpleShadow = textureLoader.load('/textures/simpleShadow.jpg')
 
 
 
@@ -116,28 +216,74 @@ directionalLight.shadow.radius = 5
  */
 const material = new THREE.MeshStandardMaterial()
 material.roughness = 0.7
+material.wireframe = true
 gui.add(material, 'metalness').min(0).max(1).step(0.001)
 gui.add(material, 'roughness').min(0).max(1).step(0.001)
 
 /**
  * Objects
  */
+
+/**
+ * 
+*/
 const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 32, 32),
     material
 )
 sphere.castShadow = true
 
-
 const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(5, 5),
-    material
-)
+    new THREE.MeshBasicMaterial({
+       //  map: bakedShadow
+    })
+    )
+    
+    const sphereShadow = new THREE.Mesh(
+       new THREE.PlaneGeometry(1.5, 1.5),
+       new THREE.MeshBasicMaterial({
+           color: 0x000000,
+           transparent: true,
+           alphaMap: simpleShadow
+       })
+    )
+    sphereShadow.rotation.x = - Math.PI * 0.5
+    sphereShadow.position.y = plane.position.y + 0.01
+    
+    scene.add(sphere, sphereShadow, plane)
+    
 plane.receiveShadow = true
 plane.rotation.x = - Math.PI * 0.5
 plane.position.y = - 0.5
 
 scene.add(sphere, plane)
+
+// * There you go, a not so realistic but very performant shadow.
+// * If you're going to animate the sphere, you can simply animate the shadow accordingly and change its opacity depending on the elevation of the sphere:
+/**
+ * const clock = new THREE.Clock()
+
+const tick = () =>
+{
+    const elapsedTime = clock.getElapsedTime()
+
+    // Update the sphere
+    sphere.position.x = Math.cos(elapsedTime) * 1.5
+    sphere.position.z = Math.sin(elapsedTime) * 1.5
+    sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
+
+    // Update the shadow
+    sphereShadow.position.x = sphere.position.x
+    sphereShadow.position.z = sphere.position.z
+    sphereShadow.material.opacity = (1 - sphere.position.y) * 0.3
+
+    // ...
+}
+
+tick()
+ */
+
 
 /**
  * Sizes
@@ -187,7 +333,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 
 
-renderer.shadowMap.enabled = true
+renderer.shadowMap.enabled = false
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
 
@@ -201,6 +347,16 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+
+    // Update the sphere
+    sphere.position.x = Math.cos(elapsedTime) * 1.5
+    sphere.position.z = Math.sin(elapsedTime) * 1.5
+    sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
+
+    // Update the shadow
+    sphereShadow.position.x = sphere.position.x
+    sphereShadow.position.z = sphere.position.z
+    sphereShadow.material.opacity = (1 - sphere.position.y) * 0.3
 
     // Update controls
     controls.update()

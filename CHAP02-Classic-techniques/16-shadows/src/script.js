@@ -236,7 +236,7 @@ sphere.castShadow = true
 const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(5, 5),
     new THREE.MeshBasicMaterial({
-       //  map: bakedShadow
+       // map: bakedShadow
     })
     )
     

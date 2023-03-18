@@ -24,8 +24,6 @@ const particleTexture = textureLoader.load('/textures/particles/2.png')
 
 
 
-
-
 /**
  * Particles
  */
@@ -48,6 +46,8 @@ scene.add(particles)
 */
 
 // Geometry
+
+
 const particlesGeometry = new THREE.BufferGeometry()
 const count = 50000
 
@@ -75,6 +75,36 @@ particlesMaterial.color = new THREE.Color('#ff88cc')
 particlesMaterial.transparent = true
 particlesMaterial.alphaMap = particleTexture
 
+// Using alphaTest
+// The alphaTest is a value between 0 and 1 that enables the WebGL to know when not to render the pixel according to that pixel's transparency.
+// By default, the value is 0 meaning that the pixel will be rendered anyway. If we use a small value such as 0.001, the pixel won't be rendered if the alpha is 0:
+// * particlesMaterial.alphaTest = 0.001
+// This solution isn't perfect and if you watch closely, you can still see glitches, but it's already more satisfying.
+
+// Using depthTest
+// When drawing, the WebGL tests if what's being drawn is closer than what's already drawn.
+// That is called depth testing and can be deactivated (you can comment the alphaTest):
+// * particlesMaterial.depthTest = false
+// While this solution seems to completely fix our problem,
+// deactivating the depth testing might create bugs if you have other objects in your scene or particles with different colors.
+// The particles might be drawn as if they were above the rest of the scene.
+// If we draw a Cube, the particles will be visible through
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(),
+    new THREE.MeshBasicMaterial()
+)
+scene.add(cube)
+
+// Using depthWrite
+// As we said, the WebGL is testing if what's being drawn is closer than what's already drawn.
+// The depth of what's being drawn is stored in what we call a depth buffer.
+// Instead of not testing if the particle is closer than what's in this depth buffer, we can tell the WebGL not to write particles in that depth buffer (you can comment the depthTest):
+particlesMaterial.depthWrite = false
+// In our case, this solution will fix the problem with almost no drawback.
+// Sometimes, other objects might be drawn behind or in front of the particles depending on many factors like the transparency, in which order you added the objects to your scene, etc.
+// We saw multiple techniques, and there is no perfect solution. You'll have to adapt and find the best combination according to the project.
+
+
 // Points
 const particles = new THREE.Points(particlesGeometry, particlesMaterial)
 scene.add(particles)
@@ -89,10 +119,9 @@ scene.add(particles)
 
 
 
-
 /**
  * Sizes
- */
+*/
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -103,11 +132,11 @@ window.addEventListener('resize', () =>
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
-
+    
     // Update camera
     camera.aspect = sizes.width / sizes.height
     camera.updateProjectionMatrix()
-
+    
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -115,7 +144,7 @@ window.addEventListener('resize', () =>
 
 /**
  * Camera
- */
+*/
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.z = 3
@@ -127,7 +156,7 @@ controls.enableDamping = true
 
 /**
  * Renderer
- */
+*/
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
@@ -136,19 +165,19 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
  * Animate
- */
+*/
 const clock = new THREE.Clock()
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
-
+    
     // Update controls
     controls.update()
-
+    
     // Render
     renderer.render(scene, camera)
-
+    
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }

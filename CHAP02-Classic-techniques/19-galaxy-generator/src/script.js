@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
+import { BufferGeometry } from 'three'
 
 /**
  * Base
@@ -14,14 +15,129 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
+
+
+
+
+
+
+
+
+
+
 /**
- * Test cube
+ * Galaxy
  */
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial()
-)
-scene.add(cube)
+
+const parameters = 
+{
+    count           : 100000,
+    size            : 0.01,
+    radius          : 5,
+    branches        : 3,
+    spin            : 1,
+    randomness      : 0.2,
+    randomnessPower : 3,
+    insideColor     : '#ff6030',
+    outsideColor    : '#1b3984'
+}
+
+let geometry = null
+let material = null
+let points   = null
+
+const generateGalaxy = () => 
+{   
+    // Destroy Galaxy, piou piou
+    if ( points !== null )
+    {
+        geometry.dispose() // The dispose() method tells Three.js that the object is no longer in use and it can free up the memory allocated for that object.
+        material.dispose() // Because its sometimes still allowed in memory, its better for performances 
+        scene.remove(points)
+    }
+    
+    geometry = new THREE.BufferGeometry()
+
+    const positions = new Float32Array(parameters.count * 3) // * 3 for X, Y, Z, each particle need 3 coordinate value 
+    const colors = new Float32Array(parameters.count * 3) 
+    
+    const colorInside = new THREE.Color(parameters.insideColor)
+    const colorOutside = new THREE.Color(parameters.outsideColor)
+    
+    for ( let i = 0; i < parameters.count ; i++)
+    {
+
+        const i3 = i * 3
+        
+        // Particles position
+        const radius = Math.random() * parameters.radius
+        const spinAngle = radius * parameters.spin 
+        const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
+
+        const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+        const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+        const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+        
+        // Color 
+        const mixedColor = colorInside.clone()
+        mixedColor.lerp(colorOutside, radius / parameters.radius)
+
+        colors[i3    ] = mixedColor.r
+        colors[i3 + 1] =  mixedColor.g
+        colors[i3 + 2] =  mixedColor.b
+
+
+        if ( i < 20 )
+        {
+            console.log(i, branchAngle)
+        }
+        positions[i3    ] = Math.cos(branchAngle + spinAngle) * radius + randomX // X
+        positions[i3 + 1] = randomY // Y
+        positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ // Z
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)) // 3 tell how much values per Array, so 3 for the X, Y , Z
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))       // 3 value R G B 
+    /**
+     * Material
+    */
+    material = new THREE.PointsMaterial({
+       size: parameters.size,               // particles Size
+       sizeAttenuation: true,               // Closer get Bigger, Far get little, perspective bro
+       depthWrite: false,                   // Will be in Front of other objects, not throught, true is by default
+       blending: THREE.AdditiveBlending,    // The colors of the object are added to the colors of other objects, which can create a bright light or emission effect.
+       vertexColors: true
+    })
+    
+    points = new THREE.Points(geometry,material)
+    scene.add(points)
+}
+generateGalaxy()
+
+// Tweaks ( Control Pannel )
+gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
+gui.add(parameters, 'size').min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy)
+gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
+gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
+gui.add(parameters, 'spin').min(-5).max(5).step(0.001).onFinishChange(generateGalaxy)
+gui.add(parameters, 'randomness').min(0).max(2).step(0.001).onFinishChange(generateGalaxy)
+gui.add(parameters, 'randomnessPower').min(1).max(10).step(0.001).onFinishChange(generateGalaxy)
+gui.addColor(parameters, 'insideColor').onFinishChange(generateGalaxy)
+gui.addColor(parameters, 'outsideColor').onFinishChange(generateGalaxy)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Sizes

@@ -4,12 +4,17 @@
     padding: 0;
 }
 
+/* removed for let the scroll possible 
 html,
 body
 {
     overflow: hidden;
 }
-
+*/
+html
+{
+    background: #1e1a20;
+}
 .webgl
 {
     position: fixed;
@@ -36,4 +41,12 @@ body
 section:nth-child(odd)
 {
     justify-content: flex-end;
+}
+
+h1, h2, h3 {
+    background: linear-gradient(to right, #31b0cc, #333399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
 }

@@ -1,6 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
+// For 3D physics, there are three main libraries:
+// Ammo.js, Cannon.js, Oimo.js
+// For 2D physics, there are many libraries, but here's the most popular:
+// Matter.js, P2.js, Planck.js, Box2D.js
+
+
+
 
 /**
  * Debug

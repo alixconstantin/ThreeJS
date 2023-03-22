@@ -6,6 +6,67 @@ import * as dat from 'lil-gui'
 // For 2D physics, there are many libraries, but here's the most popular:
 // Matter.js, P2.js, Planck.js, Box2D.js
 // We won't use a 2D library in this lesson, but the 2D library code would be very similar to a 3D library code. The main difference is the axes you have to update.
+// npm install cannon
+import CANNON from 'cannon'
+
+// First, we need to create a Cannon.js World ( Physic World ):
+/**
+ * Physics
+*/
+
+const world = new CANNON.World()
+
+
+world.gravity.set(0, - 9.82, 0) // vector 3
+
+// We can change the friction and bouncing behavior by setting a Material
+// Material is just a reference, we should create one for each type of material ( plastic, concrete, jelly, etc. ) for exemple here :
+// const concreteMaterial = new CANNON.Material('concrete')
+// const plasticMaterial = new CANNON.Material('plastic')
+const defaultMaterial = new CANNON.Material('default')
+
+// Contact Material is the combination of 2 Materials, and how they should collide
+const defaultContactMaterial = new CANNON.ContactMaterial(
+    defaultMaterial,
+    defaultMaterial,
+    {
+        friction: 0.1,
+        restitution: 0.8 // Bouncing
+    }
+)
+world.addContactMaterial(defaultContactMaterial)
+
+
+
+// * Sphere Physics
+// We need to create a Body, Bodies are object that will fall and collide with other bodies // Three(Mesh) <-> Physic(Bodies)
+// First we need to create a Shape ( There are many available primitive shapes like Box, Cylinder, Plane, etc. )
+const sphereShape = new CANNON.Sphere(0.5) // 0.5 as the Mesh Sphere
+// Then we can create our Body and specify a mass and a position:
+const sphereBody = new CANNON.Body({
+    mass: 1, // weight
+    position: new CANNON.Vec3(0, 3, 0),
+    shape: sphereShape,
+   //  material: defaultMaterial
+})
+// Finally, we can add the Body to the world with addBody(...):
+world.addBody(sphereBody)
+
+
+// * Floor Physics 
+const floorShape = new CANNON.Plane()
+const floorBody = new CANNON.Body()
+floorBody.mass = 0 // 0 because it wont move
+floorBody.addShape(floorShape) // Or can be declared as shape: floorShape in the object
+floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(- 1, 0, 0), Math.PI * 0.5) // Just for position the Floor Physic with the Floor Mesh
+// floorBody.material = defaultMaterial
+
+world.addBody(floorBody)
+
+// We can also for Bouncing and friction do it globaly than on each Material if they are all same  :
+world.defaultContactMaterial = defaultContactMaterial
+
+
 
 
 
@@ -138,10 +199,20 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Animate
  */
 const clock = new THREE.Clock()
+const oldElapsedTime = 0
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - oldElapsedTime
+    // console.log(deltaTime)
+
+    // Update the physics World
+     world.step( 1/60, deltaTime, 3)  // step( a fixed time step ( 60 fps), How much time passed since the last step, How much iterations the world can apply to catch up with a potential delay)
+
+    sphere.position.x = sphereBody.position.x // Or we can writte 1 line : sphere.position.copy(sphereBody.position)
+    sphere.position.y = sphereBody.position.y
+    sphere.position.z = sphereBody.position.z
 
     // Update controls
     controls.update()

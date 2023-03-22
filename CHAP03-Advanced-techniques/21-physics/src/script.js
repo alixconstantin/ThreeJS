@@ -5,7 +5,7 @@ import * as dat from 'lil-gui'
 // Ammo.js, Cannon.js, Oimo.js
 // For 2D physics, there are many libraries, but here's the most popular:
 // Matter.js, P2.js, Planck.js, Box2D.js
-
+// We won't use a 2D library in this lesson, but the 2D library code would be very similar to a 3D library code. The main difference is the axes you have to update.
 
 
 

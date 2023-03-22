@@ -7,7 +7,7 @@ import * as dat from 'lil-gui'
 // Matter.js, P2.js, Planck.js, Box2D.js
 // We won't use a 2D library in this lesson, but the 2D library code would be very similar to a 3D library code. The main difference is the axes you have to update.
 // npm install cannon
-import CANNON from 'cannon'
+import CANNON, { Vec3 } from 'cannon'
 
 // First, we need to create a Cannon.js World ( Physic World ):
 /**
@@ -30,8 +30,8 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
     defaultMaterial,
     defaultMaterial,
     {
-        friction: 0.1,
-        restitution: 0.8 // Bouncing
+        friction: 0.01,
+        restitution: 0.9 // Bouncing
     }
 )
 world.addContactMaterial(defaultContactMaterial)
@@ -39,6 +39,7 @@ world.addContactMaterial(defaultContactMaterial)
 
 
 // * Sphere Physics
+/* 1
 // We need to create a Body, Bodies are object that will fall and collide with other bodies // Three(Mesh) <-> Physic(Bodies)
 // First we need to create a Shape ( There are many available primitive shapes like Box, Cylinder, Plane, etc. )
 const sphereShape = new CANNON.Sphere(0.5) // 0.5 as the Mesh Sphere
@@ -47,11 +48,15 @@ const sphereBody = new CANNON.Body({
     mass: 1, // weight
     position: new CANNON.Vec3(0, 3, 0),
     shape: sphereShape,
-   //  material: defaultMaterial
+   // material: defaultMaterial
 })
+ 
+// Use applyLocalForce(...) to apply a small push on our SphereBody at the start 
+sphereBody.applyLocalForce(new CANNON.Vec3(50, 0, 0), new CANNON.Vec3(0, 0, 0))
+
 // Finally, we can add the Body to the world with addBody(...):
 world.addBody(sphereBody)
-
+*/
 
 // * Floor Physics 
 const floorShape = new CANNON.Plane()
@@ -72,8 +77,18 @@ world.defaultContactMaterial = defaultContactMaterial
 
 /**
  * Debug
- */
+*/
+
 const gui = new dat.GUI()
+const debugObject = {}
+
+debugObject.createSphere = () =>
+{
+    createSphere(0.5, { x: 0, y: 3, z: 0 })
+}
+
+
+gui.add(debugObject, 'createSphere')
 
 /**
  * Base
@@ -101,7 +116,7 @@ const environmentMapTexture = cubeTextureLoader.load([
 
 /**
  * Test sphere
- */
+ 2
 const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 32, 32),
     new THREE.MeshStandardMaterial({
@@ -114,6 +129,8 @@ const sphere = new THREE.Mesh(
 sphere.castShadow = true
 sphere.position.y = 0.5
 scene.add(sphere)
+ */
+
 
 /**
  * Floor
@@ -196,6 +213,50 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
+ * Utils
+ */
+
+// an Array that will contain objects composed of the Mesh and the Body
+const objectToUpdate = []
+
+const createSphere = (radius, position) => 
+{
+    // ThreeJS Mesh
+    const mesh = new THREE.Mesh(
+        new THREE.SphereBufferGeometry(),
+        new THREE.MeshStandardMaterial({
+            metalness: 0.3,
+            roughness: 0.4,
+            envMap: environmentMapTexture
+        }),
+        )
+        mesh.castShadow = true,
+        mesh.position.copy(position),
+        scene.add(mesh)
+
+    // Canon Js Body
+    const shape = new CANNON.Sphere(radius)
+    const body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(0, 3, 0),
+        shape: shape,
+        material: defaultMaterial
+    })
+    body.position.copy(position)
+    world.addBody(body)
+
+    // Save it in object to update
+    objectToUpdate.push({
+        mesh,
+        body
+    })
+
+} 
+
+
+
+console.log(objectToUpdate)
+/**
  * Animate
  */
 const clock = new THREE.Clock()
@@ -208,12 +269,19 @@ const tick = () =>
     // console.log(deltaTime)
 
     // Update the physics World
-     world.step( 1/60, deltaTime, 3)  // step( a fixed time step ( 60 fps), How much time passed since the last step, How much iterations the world can apply to catch up with a potential delay)
+    world.step( 1/60, deltaTime, 3)  // step( a fixed time step ( 60 fps), How much time passed since the last step, How much iterations the world can apply to catch up with a potential delay)
+    
+    for ( const object of objectToUpdate )  // For apply Physics World on 3D World
+    {
+        object.mesh.position.copy(object.body.position)
+    }
+
+    /* 3 sphereBody.applyForce(new CANNON.Vec3(-0.5,0,0), sphereBody.position)
 
     sphere.position.x = sphereBody.position.x // Or we can writte 1 line : sphere.position.copy(sphereBody.position)
     sphere.position.y = sphereBody.position.y
-    sphere.position.z = sphereBody.position.z
-
+    sphere.position.z = sphereBody.position.z */
+    
     // Update controls
     controls.update()
 

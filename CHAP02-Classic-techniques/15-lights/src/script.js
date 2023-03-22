@@ -28,6 +28,7 @@ const scene = new THREE.Scene()
 // * The first parameter is the color and the second parameter is the intensity
 // * Ambiant light can be used as fake the light bounce.
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+gui.add(ambientLight, 'intensity', 0, 100, 1 )
 scene.add(ambientLight)
 
 

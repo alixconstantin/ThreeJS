@@ -31,15 +31,15 @@ const scene = new THREE.Scene()
 
 const parameters = 
 {
-    count           : 100000,
-    size            : 0.01,
-    radius          : 5,
-    branches        : 3,
-    spin            : 1,
-    randomness      : 0.2,
-    randomnessPower : 3,
-    insideColor     : '#ff6030',
-    outsideColor    : '#1b3984'
+    count           : 471500,
+    size            : 0.004,
+    radius          : 7.47,
+    branches        : 12,
+    spin            : 0.994,
+    randomness      : 0.746,
+    randomnessPower : 10,
+    insideColor     : '#2e62ff',
+    outsideColor    : '#2effe7'
 }
 
 let geometry = null
@@ -82,7 +82,7 @@ const generateGalaxy = () =>
         const mixedColor = colorInside.clone()
         mixedColor.lerp(colorOutside, radius / parameters.radius)
 
-        colors[i3    ] = mixedColor.r
+        colors[i3    ] =  mixedColor.r
         colors[i3 + 1] =  mixedColor.g
         colors[i3 + 2] =  mixedColor.b
 
@@ -115,7 +115,7 @@ generateGalaxy()
 
 // Tweaks ( Control Pannel )
 gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
-gui.add(parameters, 'size').min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy)
+gui.add(parameters, 'size').min(0.001).max(0.011).step(0.001).onFinishChange(generateGalaxy)
 gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
 gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
 gui.add(parameters, 'spin').min(-5).max(5).step(0.001).onFinishChange(generateGalaxy)
@@ -123,16 +123,6 @@ gui.add(parameters, 'randomness').min(0).max(2).step(0.001).onFinishChange(gener
 gui.add(parameters, 'randomnessPower').min(1).max(10).step(0.001).onFinishChange(generateGalaxy)
 gui.addColor(parameters, 'insideColor').onFinishChange(generateGalaxy)
 gui.addColor(parameters, 'outsideColor').onFinishChange(generateGalaxy)
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -196,6 +186,10 @@ const tick = () =>
 
     // Update controls
     controls.update()
+
+    // Rotation Galaxy
+    // points.rotations.y * elapsedTime
+    points.rotation.y = elapsedTime*0.08
 
     // Render
     renderer.render(scene, camera)

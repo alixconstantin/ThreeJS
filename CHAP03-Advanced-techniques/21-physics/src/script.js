@@ -31,7 +31,7 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
     defaultMaterial,
     {
         friction: 0.01,
-        restitution: 0.9 // Bouncing
+        restitution: 0.6// Bouncing
     }
 )
 world.addContactMaterial(defaultContactMaterial)
@@ -84,7 +84,14 @@ const debugObject = {}
 
 debugObject.createSphere = () =>
 {
-    createSphere(0.5, { x: 0, y: 3, z: 0 })
+    createSphere(   // createSphere (radius, position)
+        Math.random() * 0.5, 
+        {
+            x: (Math.random() - 0.5) * 3,
+            y: 3,
+            z: (Math.random() - 0.5) * 3
+        }
+    )
 }
 
 
@@ -136,7 +143,7 @@ scene.add(sphere)
  * Floor
  */
 const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
+    new THREE.PlaneGeometry(40, 40),
     new THREE.MeshStandardMaterial({
         color: '#777777',
         metalness: 0.3,
@@ -219,20 +226,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 // an Array that will contain objects composed of the Mesh and the Body
 const objectToUpdate = []
 
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 20)
+const sphereMaterial = new THREE.MeshStandardMaterial({
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+    envMapIntensity: 0.5
+})
 const createSphere = (radius, position) => 
 {
     // ThreeJS Mesh
-    const mesh = new THREE.Mesh(
-        new THREE.SphereBufferGeometry(),
-        new THREE.MeshStandardMaterial({
-            metalness: 0.3,
-            roughness: 0.4,
-            envMap: environmentMapTexture
-        }),
-        )
-        mesh.castShadow = true,
-        mesh.position.copy(position),
-        scene.add(mesh)
+    const mesh = new THREE.Mesh( sphereGeometry, sphereMaterial)
+    mesh.castShadow = true,
+    mesh.scale.set(radius, radius, radius)
+    mesh.position.copy(position),
+    scene.add(mesh)
 
     // Canon Js Body
     const shape = new CANNON.Sphere(radius)
@@ -252,8 +260,6 @@ const createSphere = (radius, position) =>
     })
 
 } 
-
-
 
 console.log(objectToUpdate)
 /**

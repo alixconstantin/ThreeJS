@@ -16,6 +16,11 @@ import CANNON, { Vec3 } from 'cannon'
 
 const world = new CANNON.World()
 
+// Better Performance, but can got bugs on object traveling too fast
+world.broadphase = new CANNON.SAPBroadphase(world)
+
+// Framerate improvement, material that doesnt got collision sleep until they got impacted
+world.allowSleep = true
 
 world.gravity.set(0, - 9.82, 0) // vector 3
 
@@ -94,7 +99,21 @@ debugObject.createSphere = () =>
     )
 }
 
+debugObject.createBox = () =>
+{
+    createBox(
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        {
+            x: (Math.random() - 0.5) * 3,
+            y: 3,
+            z: (Math.random() - 0.5) * 3
+        }
+        )
+    }
 
+gui.add(debugObject, 'createBox')
 gui.add(debugObject, 'createSphere')
 
 /**
@@ -261,7 +280,43 @@ const createSphere = (radius, position) =>
 
 } 
 
-console.log(objectToUpdate)
+// Create box
+const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+const boxMaterial = new THREE.MeshStandardMaterial({
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+    envMapIntensity: 0.5
+})
+const createBox = (width, height, depth, position) =>
+{
+    // Three.js mesh
+    const mesh = new THREE.Mesh(boxGeometry, boxMaterial)
+    mesh.scale.set(width, height, depth)
+    mesh.castShadow = true
+    mesh.position.copy(position)
+    scene.add(mesh)
+
+    // Cannon.js body
+    const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5))
+
+    const body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(0, 3, 0),
+        shape: shape,
+        material: defaultMaterial
+    })
+    body.position.copy(position)
+    // body.addEventListener('collide', playHitSound)
+    world.addBody(body)
+
+    // Save in objects
+    objectToUpdate.push({ mesh, body })
+}
+
+createBox(1, 1.5, 2, { x: 0, y: 3, z: 0 })
+
+
 /**
  * Animate
  */
@@ -280,6 +335,7 @@ const tick = () =>
     for ( const object of objectToUpdate )  // For apply Physics World on 3D World
     {
         object.mesh.position.copy(object.body.position)
+        object.mesh.quaternion.copy(object.body.quaternion)
     }
 
     /* 3 sphereBody.applyForce(new CANNON.Vec3(-0.5,0,0), sphereBody.position)

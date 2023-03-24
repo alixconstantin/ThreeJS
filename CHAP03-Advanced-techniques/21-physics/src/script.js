@@ -113,12 +113,47 @@ debugObject.createBox = () =>
         )
     }
 
+// Reset
+debugObject.reset = () =>
+{
+    for(const object of objectsToUpdate)
+    {
+        // Remove body
+        object.body.removeEventListener('collide', playHitSound)
+        world.removeBody(object.body)
+
+        // Remove mesh
+        scene.remove(object.mesh)
+    }
+    
+    objectsToUpdate.splice(0, objectsToUpdate.length)
+}
+
 gui.add(debugObject, 'createBox')
 gui.add(debugObject, 'createSphere')
+gui.add(debugObject, 'reset')
+
+/**
+ * Sounds
+ */
+const hitSound = new Audio('/sounds/hit.mp3')
+
+const playHitSound = (collision) =>
+{
+    const impactStrength = collision.contact.getImpactVelocityAlongNormal()
+
+    if(impactStrength > 1.5)
+    {
+        hitSound.volume = Math.random()
+        hitSound.currentTime = 0
+        hitSound.play()
+    }
+}
 
 /**
  * Base
  */
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
@@ -243,7 +278,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 
 // an Array that will contain objects composed of the Mesh and the Body
-const objectToUpdate = []
+const objectsToUpdate = []
 
 const sphereGeometry = new THREE.SphereGeometry(1, 20, 20)
 const sphereMaterial = new THREE.MeshStandardMaterial({
@@ -270,10 +305,11 @@ const createSphere = (radius, position) =>
         material: defaultMaterial
     })
     body.position.copy(position)
+    body.addEventListener('collide', playHitSound)
     world.addBody(body)
 
     // Save it in object to update
-    objectToUpdate.push({
+    objectsToUpdate.push({
         mesh,
         body
     })
@@ -307,11 +343,11 @@ const createBox = (width, height, depth, position) =>
         material: defaultMaterial
     })
     body.position.copy(position)
-    // body.addEventListener('collide', playHitSound)
+    body.addEventListener('collide', playHitSound)
     world.addBody(body)
 
     // Save in objects
-    objectToUpdate.push({ mesh, body })
+    objectsToUpdate.push({ mesh, body })
 }
 
 createBox(1, 1.5, 2, { x: 0, y: 3, z: 0 })
@@ -332,7 +368,7 @@ const tick = () =>
     // Update the physics World
     world.step( 1/60, deltaTime, 3)  // step( a fixed time step ( 60 fps), How much time passed since the last step, How much iterations the world can apply to catch up with a potential delay)
     
-    for ( const object of objectToUpdate )  // For apply Physics World on 3D World
+    for ( const object of objectsToUpdate )  // For apply Physics World on 3D World
     {
         object.mesh.position.copy(object.body.position)
         object.mesh.quaternion.copy(object.body.quaternion)

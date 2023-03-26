@@ -84,6 +84,7 @@ gltfLoader.load(
     '/models/Fox/glTF/Fox.gltf',
     (gltf) =>
     {   
+        gltf.scene.position.y = 0.2
         gltf.scene.scale.set(0.025, 0.025, 0.025)
         scene.add(gltf.scene)
         // Handle the animation
@@ -119,16 +120,17 @@ const scene = new THREE.Scene()
 /**
  * Floor
  */
+const texture = new THREE.TextureLoader().load('/1.jpeg');
+
 const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
-    new THREE.MeshStandardMaterial({
-        color: '#444444',
-        metalness: 0,
-        roughness: 0.5
+    new THREE.BoxGeometry(10, 1, 10), // Utiliser une géométrie de "Box" avec une hauteur de 1
+    new THREE.MeshMatcapMaterial({
+      matcap: texture,
+     
     })
-)
+  );
 floor.receiveShadow = true
-floor.rotation.x = - Math.PI * 0.5
+floor.scale.set(0.7, 0.265, 0.945)
 scene.add(floor)
 
 /**
@@ -176,7 +178,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(2, 2, 2)
+camera.position.set(7.5, 4, 8)
 scene.add(camera)
 
 // Controls

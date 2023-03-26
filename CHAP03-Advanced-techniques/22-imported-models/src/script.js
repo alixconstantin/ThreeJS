@@ -77,6 +77,33 @@ dracoLoader.load(
 )
  */
 
+// ANIMATION 
+let mixer = null
+
+gltfLoader.load(
+    '/models/Fox/glTF/Fox.gltf',
+    (gltf) =>
+    {   
+        gltf.scene.scale.set(0.025, 0.025, 0.025)
+        scene.add(gltf.scene)
+        // Handle the animation
+        // If you look at the loaded gltf object, you can see a property named animations containing multiple AnimationClip.
+        // These AnimationClip cannot be used easily. We first need to create an AnimationMixer.
+        // An AnimationMixer is like a player associated with an object that can contain one or many AnimationClips. 
+        // The idea is to create one for each object that needs to be animated.
+        // Inside the success function, create a mixer and send the gltf.scene as parameter:
+        mixer = new THREE.AnimationMixer(gltf.scene)
+        // We can now add the AnimationClips to the mixer with the clipAction(...) method. Let's start with the first animation:
+        const action = mixer.clipAction(gltf.animations[2])
+        // This method returns a AnimationAction, and we can finally call the play() method on it:
+        action.play()
+    }
+    )
+    
+
+
+
+    
 /**
  * Base
  */
@@ -179,6 +206,12 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
+
+    if(mixer)
+    {
+        mixer.update(deltaTime)
+    }
+
 
     // Update controls
     controls.update()

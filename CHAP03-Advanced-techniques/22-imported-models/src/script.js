@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 // list of popular formats : OBJ, FBX, STL, PLY, COLLADA, 3DS, GLTF
-
+//
 // GLTF ( is becoming a standard and should cover most of the needs )
 // It supports very different sets of data.
 // You can obviously have data like the geometries and the materials but you can also have data like cameras, lights, scene graph, animations, skeletons, morphing and even multiple scene.

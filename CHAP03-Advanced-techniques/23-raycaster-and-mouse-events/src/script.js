@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // a Raycaster can cast (or shoot) a ray in a specific direction and test what objects intersect with it
 // ( Like detect if there a wall in front of a player, test if the laser gun hit something, test if something is currently under
@@ -40,7 +41,35 @@ object3.position.x = 2
 
 scene.add(object1, object2, object3)
 
+/**
+ * Model
+ */
+const gltfLoader = new GLTFLoader()
 
+let model = null
+gltfLoader.load(
+    './models/Duck/glTF-Binary/Duck.glb',
+    (gltf) =>
+    {
+        model = gltf.scene
+        console.log(model)
+        model.position.y = - 1.2
+        scene.add(model)
+    }
+)
+
+
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight('#ffffff', 0.3)
+scene.add(ambientLight)
+
+// Directional light
+const directionalLight = new THREE.DirectionalLight('#ffffff', 0.7)
+directionalLight.position.set(1, 2, 3)
+scene.add(directionalLight)
 
 /**
  * Mouse
@@ -52,12 +81,32 @@ window.addEventListener('mousemove', (event) =>
     mouse.x = event.clientX / sizes.width * 2 - 1
     mouse.y = - (event.clientY / sizes.height) * 2 + 1
 
-    console.log(mouse)
+   // console.log(mouse)
+})
+window.addEventListener('click', () =>
+{
+    if(currentIntersect)
+    {
+        switch(currentIntersect.object)
+        {
+            case object1:
+                console.log('click on object 1')
+                break
+
+            case object2:
+                console.log('click on object 2')
+                break
+
+            case object3:
+                console.log('click on object 3')
+                break
+        }
+    }
 })
 
 
 const raycaster = new THREE.Raycaster()
-let currentIntersect = null
+
 /**
  * Raycaster ( for raycaster line impact)
  
@@ -143,6 +192,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 const clock = new THREE.Clock()
 
 let currentIntersect = null
+
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
@@ -189,6 +239,30 @@ const tick = () =>
         {
             object.material.color.set('#ff0000')
         }
+    }
+
+    window.addEventListener('click', () =>
+    {
+        if(model)
+    {
+        const modelIntersects = raycaster.intersectObject(model)
+        
+        if(modelIntersects.length)
+        {
+            model.scale.set(1.2, 1.2, 1.2)
+        }
+        else
+        {
+            model.scale.set(1, 1, 1)
+        }
+    }
+    })
+
+    // Test intersect with a model
+    if(model)
+    {
+        const modelIntersects = raycaster.intersectObject(model)
+        console.log(modelIntersects)
     }
 
     // Update controls

@@ -1,2 +1,3 @@
 # install
-ll
+npm install
+npm run dev 

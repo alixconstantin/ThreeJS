@@ -1,3 +1,3 @@
 # install
 npm install
-npm run devv
+npm run dev
